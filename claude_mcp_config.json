@@ -1,0 +1,12 @@
+{
+  "mcp_servers": {
+    "gmail_integration": {
+      "command": "python",
+      "args": ["-m", "uv", "run", "mcp_server.py"],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "./credentials.json",
+        "MCP_DEBUG": "true"
+      }
+    }
+  }
+} 

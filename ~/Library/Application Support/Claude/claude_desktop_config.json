@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "gmail_mcp_server": {
+      "command": "/Users/apple/Desktop/mcp_server/venv_py312/bin/mcp",
+      "args": [
+        "run",
+        "/Users/apple/Desktop/mcp_server/server.py"
+      ],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "/Users/apple/Desktop/mcp_server/credentials.json"
+      }
+    }
+  }
+} 
