@@ -125,6 +125,20 @@ class EmailContent(BaseModel):
     date: str = Field(..., description="Email date")
     body: str = Field(..., description="Email body content")
 
+class SendEmailRequest(BaseModel):
+    """Model for sending email request."""
+    to: str = Field(..., description="Recipient's email address")
+    subject: str = Field(..., description="Email subject")
+    body: str = Field(..., description="Email body content")
+    cc: Optional[str] = Field(None, description="CC recipients (comma-separated)")
+    bcc: Optional[str] = Field(None, description="BCC recipients (comma-separated)")
+
+class SendEmailResponse(BaseModel):
+    """Model for send email response."""
+    status: str = Field(..., description="Success or error")
+    message: str = Field(..., description="Response message")
+    email_id: Optional[str] = Field(None, description="ID of the sent email")
+
 class CalendarEvent(BaseModel):
     """Model for calendar event data."""
     id: str = Field(..., description="Event ID")
@@ -318,6 +332,67 @@ def get_email_content(email_id: str) -> EmailContent:
     except Exception as e:
         print(f"Unexpected error: {e}")
         raise
+
+@mcp.tool()
+def send_email(email: SendEmailRequest) -> SendEmailResponse:
+    """
+    Send an email using Gmail.
+    
+    Args:
+        email: Email details including recipient, subject, and body
+    
+    Returns:
+        Status of email sending operation
+    """
+    try:
+        service = get_gmail_service()
+        
+        # Create the email message
+        from email.mime.text import MIMEText
+        from email.mime.multipart import MIMEMultipart
+        import base64
+        
+        message = MIMEMultipart()
+        message['to'] = email.to
+        message['subject'] = email.subject
+        
+        # Add CC and BCC if provided
+        if email.cc:
+            message['cc'] = email.cc
+        if email.bcc:
+            message['bcc'] = email.bcc
+        
+        # Add the body
+        msg = MIMEText(email.body)
+        message.attach(msg)
+        
+        # Encode the message
+        raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')
+        
+        # Send the email
+        sent_message = service.users().messages().send(
+            userId='me',
+            body={'raw': raw_message}
+        ).execute()
+        
+        return SendEmailResponse(
+            status="success",
+            message="Email sent successfully",
+            email_id=sent_message['id']
+        )
+        
+    except HttpError as error:
+        logger.error(f"Gmail API error while sending email: {error}")
+        return SendEmailResponse(
+            status="error",
+            message=f"Failed to send email: {str(error)}"
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error while sending email: {e}")
+        return SendEmailResponse(
+            status="error",
+            message=f"Failed to send email: {str(e)}"
+        )
 
 #------------------------------------------------------------------------------
 # Calendar MCP Tools
