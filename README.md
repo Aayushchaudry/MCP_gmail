@@ -133,7 +133,7 @@ mcp run server.py
 - Implement rate limiting where appropriate
 - Follow OAuth best practices
 
-## Troubleshooting
+
 
 ### Common Issues
 
