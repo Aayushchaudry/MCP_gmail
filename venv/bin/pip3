@@ -1,4 +1,4 @@
-#!/Users/apple/Desktop/mcp_server/venv/bin/python
+#!/Users/apple/Desktop/MCP_gmail/venv/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys

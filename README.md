@@ -1,83 +1,164 @@
-# MCP Server for Gmail and Google Calendar Integration
+# MCP Integration Servers
 
-This server implements the Model Context Protocol (MCP) to enable Claude Desktop to interact with Gmail and Google Calendar APIs.
+This repository contains MCP (Model Control Protocol) servers for integrating various services with Claude Desktop.
 
-## Features
+## Gmail and Google Calendar MCP Server
 
-- **Gmail Integration**
+The Gmail and Google Calendar integration allows Claude to interact with your Gmail account and Google Calendar, enabling email management and calendar operations.
+
+### Features
+
+- **Gmail Operations**:
   - Get latest emails from inbox
-  - Search for specific emails by query
-  - Retrieve email content
-  
-- **Calendar Integration**
-  - Search for calendar events
+  - Search emails using Gmail query syntax
+  - Read email content
+  - Send emails with CC and BCC support
+
+- **Calendar Operations**:
+  - Search calendar events
   - Create new calendar events
+  - View upcoming events
 
-## Setup Instructions
+### Setup Instructions
 
-### Prerequisites
-- Python 3.10 or higher (MCP package requires Python 3.10+)
-- A Google Cloud Project with the Gmail and Calendar APIs enabled
-- OAuth credentials downloaded as `credentials.json`
-- MCP package installed (`pip install mcp[cli]` or `uv add "mcp[cli]"`)
+1. **Prerequisites**:
+   - Python 3.x
+   - MCP package installed
+   - Google Cloud Console project with Gmail and Calendar APIs enabled
 
-### Installation
+2. **OAuth Credentials**:
+   - Go to Google Cloud Console
+   - Create a new project or select existing one
+   - Enable Gmail API and Google Calendar API
+   - Create OAuth 2.0 credentials
+   - Download credentials and save as `credentials.json` in the project directory
 
-1. Clone this repository
-2. Install dependencies:
+3. **Installation**:
+   ```bash
+   # Install required packages
+   pip install google-auth-oauthlib google-auth-httplib2 google-api-python-client
+
+   # Install the server in Claude Desktop
+   mcp install server.py
    ```
-   pip install -r requirements.txt
-   ```
-   
-   Or using uv (recommended):
-   ```
-   uv pip install -r requirements.txt
+
+4. **First Run**:
+   - Run the server: `mcp run server.py`
+   - First run will prompt for OAuth authentication
+   - Follow the browser link to authorize the application
+   - Token will be saved for future use
+
+### Available Tools
+
+#### Gmail Tools
+- `get_latest_emails(max_results: int = 10)`: Get latest emails from inbox
+- `search_emails(query: str, max_results: int = 10)`: Search emails using Gmail query
+- `get_email_content(email_id: str)`: Get content of a specific email
+- `send_email(to: str, subject: str, body: str, cc: Optional[str], bcc: Optional[str])`: Send email
+
+#### Calendar Tools
+- `search_events(query: str, max_results: int = 10, time_min: Optional[str])`: Search calendar events
+- `create_calendar_event(summary: str, start_time: str, end_time: str, description: Optional[str], location: Optional[str])`: Create new event
+
+## Backend API MCP Server
+
+The Backend API MCP server provides a template for integrating your custom backend API with Claude Desktop.
+
+### Features
+
+- User management operations
+- Standardized API responses
+- Error handling and logging
+- Pydantic models for data validation
+
+### Setup Instructions
+
+1. **Prerequisites**:
+   - Python 3.x
+   - MCP package installed
+
+2. **Installation**:
+   ```bash
+   # Install required packages
+   pip install pydantic
+
+   # Install the server in Claude Desktop
+   mcp install backend_server.py
    ```
 
-3. Place your Google OAuth `credentials.json` file in the root directory
+3. **Configuration**:
+   - Update the API endpoint configurations
+   - Implement actual API calls in tool functions
+   - Add authentication if required
 
-### Running the Server
+### Available Tools
 
-Using the MCP CLI (recommended):
+- `get_users(max_results: int = 10)`: Get list of users
+- `create_user(username: str, email: str, password: str)`: Create new user
+- `search_users(query: str)`: Search for users
+
+## Development
+
+### Running in Debug Mode
+
 ```bash
-# Run the server
-mcp run server.py
-
-# Run with inspector for debugging
+# Run with debug logging
+export MCP_DEBUG=true
 mcp dev server.py
+
+# Run without debug logging
+mcp run server.py
 ```
 
-Using Python directly:
-```bash
-# This will attempt to run with uvicorn
-python server.py
-```
+### Adding New Tools
 
-### Connecting to Claude Desktop
+1. Define Pydantic models for request/response
+2. Create new tool function with `@mcp.tool()` decorator
+3. Implement error handling
+4. Add logging for debugging
 
-The server can be installed in Claude Desktop using the MCP CLI:
+### Best Practices
 
-```bash
-mcp install server.py
-```
-
-Alternatively, you can manually configure Claude Desktop with the settings in `claude_desktop_config.json`.
-
-## Implementation Details
-
-This server uses:
-- `FastMCP` from the MCP package to create the server
-- Google API client libraries for Gmail and Calendar integration
-- Pydantic models for request/response validation
-- OAuth 2.0 for secure authentication
-
-## Quick Start
-
-For detailed step-by-step instructions, see the [Quick Start Guide](QUICK_START.md).
+- Use appropriate error handling
+- Include comprehensive logging
+- Validate input data using Pydantic models
+- Follow security best practices for API keys and tokens
+- Keep credentials and sensitive data secure
 
 ## Security Notes
 
-- The OAuth token workflow is securely handled
-- Tokens are stored locally in `token.pickle`
-- Credentials are never exposed to Claude
-- All API requests are properly authenticated 
+- Store API keys and credentials securely
+- Use environment variables for sensitive data
+- Never commit credentials to version control
+- Implement rate limiting where appropriate
+- Follow OAuth best practices
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Authentication Errors**:
+   - Check if credentials.json is present
+   - Verify OAuth token validity
+   - Re-authenticate if token expired
+
+2. **API Rate Limits**:
+   - Implement exponential backoff
+   - Handle quota exceeded errors
+   - Monitor API usage
+
+3. **Connection Issues**:
+   - Check network connectivity
+   - Verify API endpoint availability
+   - Confirm firewall settings
+
+## Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Commit changes
+4. Create pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details. 
